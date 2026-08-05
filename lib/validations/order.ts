@@ -5,6 +5,9 @@ export const shippingInfoSchema = z.object({
     .string()
     .min(2, 'Le nom complet doit contenir au moins 2 caractères')
     .max(100, 'Le nom complet est trop long'),
+  email: z
+    .string()
+    .email('Email invalide'),
   phone: z
     .string()
     .min(8, 'Numéro de téléphone invalide')

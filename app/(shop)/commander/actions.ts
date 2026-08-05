@@ -23,9 +23,7 @@ export async function createOrder(input: ShippingInfoInput): Promise < CreateOrd
     data: { user },
   } = await supabase.auth.getUser()
   
-  if (!user) {
-    return { success: false, error: 'Une erreur est survenue. Merci de recharger la page et réessayer.' }
-  }
+  const userId = user?.id || null
   
   const items = await getCartItems()
   if (items.length === 0) {
@@ -43,7 +41,7 @@ export async function createOrder(input: ShippingInfoInput): Promise < CreateOrd
   const { data: order, error: orderError } = await supabase
   .from('orders')
   .insert({
-    user_id: user.id,
+    user_id: userId,
     status: 'pending',
     subtotal,
     shipping_cost: shippingCost,
@@ -54,7 +52,7 @@ export async function createOrder(input: ShippingInfoInput): Promise < CreateOrd
       city: parsed.data.city,
       address: parsed.data.address,
     },
-    contact_email: null,
+    contact_email: parsed.data.email,
     contact_phone: parsed.data.phone,
     notes: parsed.data.notes || null,
   })
@@ -85,7 +83,9 @@ export async function createOrder(input: ShippingInfoInput): Promise < CreateOrd
   }
   
   // 3. Vider le panier
-  await supabase.from('cart_items').delete().eq('user_id', user.id)
+  if (userId) {
+    await supabase.from('cart_items').delete().eq('user_id', userId)
+  }
   
   // 4. Construire le lien WhatsApp avec le récapitulatif
   const settings = await getSiteSettings()
@@ -97,6 +97,7 @@ export async function createOrder(input: ShippingInfoInput): Promise < CreateOrd
       ...lines,
       ``,
       `Nom : ${parsed.data.fullName}`,
+      `Email : ${parsed.data.email}`,
       `Téléphone : ${parsed.data.phone}`,
       `Ville : ${parsed.data.city}`,
       `Adresse : ${parsed.data.address}`,
