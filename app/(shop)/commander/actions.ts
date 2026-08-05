@@ -6,11 +6,11 @@ import { getSiteSettings } from '@/lib/data/settings'
 import { getEffectivePrice } from '@/lib/utils'
 import { shippingInfoSchema, type ShippingInfoInput } from '@/lib/validations/order'
 
-type CreateOrderResult =
-  | { success: true; orderReference: string; whatsappUrl: string }
-  | { success: false; error: string }
+type CreateOrderResult = |
+  { success: true;orderReference: string;whatsappUrl: string } |
+  { success: false;error: string }
 
-export async function createOrder(input: ShippingInfoInput): Promise<CreateOrderResult> {
+export async function createOrder(input: ShippingInfoInput): Promise < CreateOrderResult > {
   const parsed = shippingInfoSchema.safeParse(input)
   
   if (!parsed.success) {

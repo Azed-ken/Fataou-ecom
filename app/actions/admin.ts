@@ -15,7 +15,7 @@ type ActionResult = { success: true } | { success: false;error: string }
 export async function updateOrderStatus(input: {
   orderId: string
   status: OrderStatus
-}): Promise<ActionResult> {
+}): Promise < ActionResult > {
   const parsed = updateOrderStatusSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Données invalides.' }
@@ -126,7 +126,7 @@ const deleteOrderSchema = z.object({
   orderId: z.string().uuid(),
 })
 
-export async function deleteOrder(input: { orderId: string }): Promise<ActionResult> {
+export async function deleteOrder(input: { orderId: string }): Promise < ActionResult > {
   const parsed = deleteOrderSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: 'Données invalides.' }
