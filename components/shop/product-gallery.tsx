@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ImageOff, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { ImageOff, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProductGalleryProps {
@@ -14,6 +14,7 @@ interface ProductGalleryProps {
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [dragX, setDragX] = useState(0)
   const active = images[activeIndex]
 
   const goToPrevious = () => {
@@ -22,6 +23,18 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   const goToNext = () => {
     setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+  }
+
+  const handleDragEnd = (event: any, info: any) => {
+    const swipeThreshold = 50
+    const swipe = info.offset.x
+
+    if (swipe < -swipeThreshold) {
+      goToNext()
+    } else if (swipe > swipeThreshold) {
+      goToPrevious()
+    }
+    setDragX(0)
   }
 
   if (images.length === 0) {
@@ -117,53 +130,53 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 overflow-hidden"
             >
               {/* Close Button */}
               <button
                 onClick={() => setIsLightboxOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
                 aria-label="Fermer"
               >
                 <X className="h-6 w-6 text-white" />
               </button>
 
-              {/* Image */}
-              <div className="relative h-full w-full max-w-4xl max-h-[85vh]">
-                <Image
-                  src={images[activeIndex].url}
-                  alt={images[activeIndex].alt_text || productName}
-                  fill
-                  priority
-                  sizes="90vw"
-                  className="object-contain"
-                />
-              </div>
+              {/* Image Container avec Swipe */}
+              <motion.div
+                drag={images.length > 1 ? 'x' : false}
+                dragElastic={0.2}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDrag={(event, info) => setDragX(info.offset.x)}
+                onDragEnd={handleDragEnd}
+                className="relative h-full w-full max-w-4xl max-h-[85vh] cursor-grab active:cursor-grabbing"
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0, x: dragX > 0 ? -100 : 100 }}
+                    animate={{ opacity: 1, x: dragX }}
+                    exit={{ opacity: 0, x: dragX > 0 ? 100 : -100 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={images[activeIndex].url}
+                      alt={images[activeIndex].alt_text || productName}
+                      fill
+                      priority
+                      sizes="90vw"
+                      className="object-contain pointer-events-none select-none"
+                      draggable={false}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
 
-              {/* Navigation Buttons */}
+              {/* Counter */}
               {images.length > 1 && (
-                <>
-                  <button
-                    onClick={goToPrevious}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    aria-label="Image précédente"
-                  >
-                    <ChevronLeft className="h-6 w-6 text-white" />
-                  </button>
-
-                  <button
-                    onClick={goToNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    aria-label="Image suivante"
-                  >
-                    <ChevronRight className="h-6 w-6 text-white" />
-                  </button>
-
-                  {/* Counter */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm">
-                    {activeIndex + 1} / {images.length}
-                  </div>
-                </>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm">
+                  {activeIndex + 1} / {images.length}
+                </div>
               )}
             </motion.div>
           </>
