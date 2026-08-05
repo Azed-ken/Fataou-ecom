@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ImageOff, X } from 'lucide-react'
+import { ImageOff, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ProductGalleryProps {
@@ -22,19 +22,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   const goToNext = () => {
     setActiveIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
-
-  const handleDragEnd = (event: any, info: any) => {
-    const swipeThreshold = 50
-    const swipe = info.offset.x
-
-    if (swipe < -swipeThreshold) {
-      // Swipe gauche → image suivante
-      goToNext()
-    } else if (swipe > swipeThreshold) {
-      // Swipe droite → image précédente
-      goToPrevious()
-    }
   }
 
   if (images.length === 0) {
@@ -141,36 +128,42 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 <X className="h-6 w-6 text-white" />
               </button>
 
-              {/* Image avec Swipe */}
-              <motion.div
-                drag={images.length > 1 ? 'x' : false}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
-                className="relative h-full w-full max-w-4xl max-h-[85vh] cursor-grab active:cursor-grabbing"
-              >
+              {/* Image */}
+              <div className="relative h-full w-full max-w-4xl max-h-[85vh]">
                 <Image
                   src={images[activeIndex].url}
                   alt={images[activeIndex].alt_text || productName}
                   fill
                   priority
                   sizes="90vw"
-                  className="object-contain pointer-events-none"
-                  draggable={false}
+                  className="object-contain"
                 />
-              </motion.div>
+              </div>
 
-              {/* Counter */}
+              {/* Navigation Buttons */}
               {images.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm">
-                  {activeIndex + 1} / {images.length}
-                </div>
-              )}
+                <>
+                  <button
+                    onClick={goToPrevious}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                    aria-label="Image précédente"
+                  >
+                    <ChevronLeft className="h-6 w-6 text-white" />
+                  </button>
 
-              {/* Hint Text */}
-              {images.length > 1 && (
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/60 text-xs">
-                  Glisse pour naviguer
-                </div>
+                  <button
+                    onClick={goToNext}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                    aria-label="Image suivante"
+                  >
+                    <ChevronRight className="h-6 w-6 text-white" />
+                  </button>
+
+                  {/* Counter */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm">
+                    {activeIndex + 1} / {images.length}
+                  </div>
+                </>
               )}
             </motion.div>
           </>
