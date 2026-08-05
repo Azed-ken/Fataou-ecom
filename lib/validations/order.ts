@@ -21,4 +21,4 @@ export const shippingInfoSchema = z.object({
   notes: z.string().max(500, 'Note trop longue').optional().or(z.literal('')),
 })
 
-export type ShippingInfoInput = z.infer < typeof shippingInfoSchema >
+export type ShippingInfoInput = z.infer<typeof shippingInfoSchema>

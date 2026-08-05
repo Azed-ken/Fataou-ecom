@@ -13,13 +13,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { FieldError } from '@/components/ui/field-error'
 
 export function ShippingForm() {
-  const [serverError, setServerError] = useState < string | null > (null)
+  const [serverError, setServerError] = useState<string | null>(null)
   
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm < ShippingInfoInput > ({ resolver: zodResolver(shippingInfoSchema) })
+  } = useForm<ShippingInfoInput>({ resolver: zodResolver(shippingInfoSchema) })
   
   async function onSubmit(data: ShippingInfoInput) {
     setServerError(null)
